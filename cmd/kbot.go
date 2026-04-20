@@ -10,13 +10,33 @@ import (
 	"time"
 
 	"github.com/spf13/cobra"
-	telebot "gopkg.in/telebot.v3"
+	telebot "gopkg.in/telebot.v4"
 )
 
 var (
 	//teletoken bot
 	TeleToken = os.Getenv("TELE_TOKEN")
+	// player answer
+	playerAnswer = ""
+	// bot answer
+	botAnswer = ""
 )
+
+// buttons
+var (
+	btnRock     = menu.Text("Rock")
+	btnPaper    = menu.Text("Paper")
+	btnScissors = menu.Text("Scissors")
+)
+
+// RPS game represents a score
+type RPSgame struct {
+	PlayerScore int
+	BotScore    int
+}
+
+// menu builder
+var menu = &telebot.ReplyMarkup{ResizeKeyboard: true}
 
 // kbotCmd represents the kbot command
 var kbotCmd = &cobra.Command{
@@ -30,7 +50,14 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Printf("knot %s started", appVersion)
+		// fmt.Println("TeleToken")
+
+		// fmt.Println(TeleToken)
+		fmt.Printf("knot %s started ", appVersion)
+
+		menu.Reply(
+			menu.Row(btnRock, btnPaper, btnScissors),
+		)
 
 		kbot, err := telebot.NewBot(telebot.Settings{
 			URL:    "",
@@ -41,14 +68,24 @@ to quickly create a Cobra application.`,
 			log.Fatalf("Please, check TELE_TOKEN env variable. %s", err)
 			return
 		}
+
+		// kbot.Handle("/start", func(c telebot.Context) error {
+		// 	return c.Send("Choose your weapon:", menu)
+		// })
+
 		kbot.Handle(telebot.OnText, func(message telebot.Context) error {
 			log.Print(message.Message().Payload, message.Text())
 			payload := message.Message().Payload
 
 			switch payload {
+			case "/start":
+				err = message.Send(fmt.Sprintf("Welcome! Choose any option below:", menu))
 			case "hello":
 				err = message.Send(fmt.Sprintf("Hello, I'm kbot %s!", appVersion))
+			default:
+				err = message.Send(fmt.Sprintf("Your messge recieved %s!", appVersion))
 			}
+
 			return err
 		})
 		kbot.Start()
