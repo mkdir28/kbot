@@ -6,6 +6,7 @@ package cmd
 import (
 	"fmt"
 	"log"
+	"math/rand"
 	"os"
 	"time"
 
@@ -16,27 +17,33 @@ import (
 var (
 	//teletoken bot
 	TeleToken = os.Getenv("TELE_TOKEN")
+)
+
+// choise for bot
+var choices = map[int]string{
+	0: "rock",
+	1: "paper",
+	2: "scissors",
+}
+
+var (
 	// player answer
 	playerAnswer = ""
 	// bot answer
-	botAnswer = ""
+	botAnswer   = ""
+	playerScore = 0
+	botScore    = 0
 )
-
-// buttons
-var (
-	btnRock     = menu.Text("Rock")
-	btnPaper    = menu.Text("Paper")
-	btnScissors = menu.Text("Scissors")
-)
-
-// RPS game represents a score
-type RPSgame struct {
-	PlayerScore int
-	BotScore    int
-}
 
 // menu builder
 var menu = &telebot.ReplyMarkup{ResizeKeyboard: true}
+
+// buttons
+var (
+	btnRock     = menu.Text("rock")
+	btnPaper    = menu.Text("paper")
+	btnScissors = menu.Text("scissors")
+)
 
 // kbotCmd represents the kbot command
 var kbotCmd = &cobra.Command{
@@ -50,10 +57,7 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		// fmt.Println("TeleToken")
-
-		// fmt.Println(TeleToken)
-		fmt.Printf("knot %s started ", appVersion)
+		fmt.Printf("kbot %s started ", appVersion)
 
 		menu.Reply(
 			menu.Row(btnRock, btnPaper, btnScissors),
@@ -69,19 +73,20 @@ to quickly create a Cobra application.`,
 			return
 		}
 
-		// kbot.Handle("/start", func(c telebot.Context) error {
-		// 	return c.Send("Choose your weapon:", menu)
-		// })
-
 		kbot.Handle(telebot.OnText, func(message telebot.Context) error {
 			log.Print(message.Message().Payload, message.Text())
 			payload := message.Message().Payload
 
 			switch payload {
-			case "/start":
-				err = message.Send(fmt.Sprintf("Welcome! Choose any option below:", menu))
+			case "play":
+				err = message.Send("Here is a menu", menu)
+			case btnRock.Text, btnPaper.Text, btnScissors.Text:
+				playerAnswer := payload
+				botAnswer := getBotAnswer()
+				playerScore, botScore = calculateScore(playerScore, botScore, playerAnswer, botAnswer)
+				err = message.Send(fmt.Sprintf("I got %s.\nOur Score: You %d, Bot %d", botAnswer, playerScore, botScore))
 			case "hello":
-				err = message.Send(fmt.Sprintf("Hello, I'm kbot %s!", appVersion))
+				err = message.Send(fmt.Sprintf("Hello, I am kbot %s", appVersion))
 			default:
 				err = message.Send(fmt.Sprintf("Your messge recieved %s!", appVersion))
 			}
@@ -90,6 +95,31 @@ to quickly create a Cobra application.`,
 		})
 		kbot.Start()
 	},
+}
+
+func getBotAnswer() string {
+	randomAnswer := rand.Intn(len(choices))
+
+	return choices[randomAnswer]
+}
+
+func calculateScore(playerScore int, botScore int, playerAnswer string, botAnswer string) (int, int) {
+	if playerAnswer == botAnswer {
+		fmt.Print("No one")
+	} else if playerAnswer == "paper" && botAnswer == "rock" {
+		playerScore += 1
+	} else if playerAnswer == "scissors" && botAnswer == "rock" {
+		botScore += 1
+	} else if playerAnswer == "rock" && botAnswer == "paper" {
+		botScore += 1
+	} else if playerAnswer == "rock" && botAnswer == "scissors" {
+		playerScore += 1
+	} else if playerAnswer == "scissors" && botAnswer == "paper" {
+		playerScore += 1
+	} else if playerAnswer == "paper" && botAnswer == "scissors" {
+		botScore += 1
+	}
+	return playerScore, botScore
 }
 
 func init() {
