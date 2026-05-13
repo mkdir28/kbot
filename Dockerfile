@@ -1,7 +1,8 @@
-FROM golang:1.26 AS builder
+FROM quay.io/projectquay/golang:1.26 AS builder
 
 WORKDIR /go/src/app
 COPY . .
+ARG TARGETARCH
 RUN make deps
 RUN make build
 
