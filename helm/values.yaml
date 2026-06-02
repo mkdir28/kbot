@@ -3,6 +3,7 @@ replicaCount: 1
 image:
   repository: mkdir28
   tag: "v1.0.6-3877565"
+  arch: amd64
 
 secret:
   name: kbot
