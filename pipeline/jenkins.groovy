@@ -1,5 +1,9 @@
 pipeline {
     agent any
+    parameters {
+        choice(name: 'OS', choices: ['linux', 'apple', 'windows'], description: 'Pick OS')
+        choice(name: 'ARCH', choices: ['amd64', 'arm64'], description: 'Pick ARCH')
+    }
     environment {
         REPO = 'https://github.com/mkdir28/kbot'
         BRANCH = 'main'
