@@ -54,4 +54,5 @@ jobs:
         git config user.name github-actions
         git config user.email github-actions@github.com
         git commit -am "updated version ${{ env.VERSION }}"
-        git push
+        git pull --rebase origin develop
+        git push origin develop
