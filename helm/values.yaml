@@ -1,33 +1,28 @@
 replicaCount: 1
-
 image:
-  repository: mkdir28
-  tag: "v1.0.6-3877565"
+  registry: "ghcr.io"
+  repository: "mkdir28/kbot"
+  tag: "v1.0.7-1a897b5"
+  os: linux
   arch: amd64
-
 secret:
   name: kbot
   tokenKey: token
   tokenName: TELE_TOKEN
-
 service:
   type: ClusterIP
   port: 80
-
 autoscaling:
   enabled: false
   minReplicas: 1
   maxReplicas: 100
   targetCPUUtilizationPercentage: 80
-
 serviceAccount:
   create: true
   annotations: {}
   name: ""
-
 httpRoute:
   enabled: false
-
 ingress:
   enabled: false
   className: ""
